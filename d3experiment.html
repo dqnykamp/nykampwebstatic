@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Nykamp web</title>
+
+<script src="/js/d3.min.js"></script>
+<script src="/js/numeric-1.2.6.min.js"></script>
+
+
+</head>
+
+<body>
+
+<svg id="canvas" width="500" height="500">
+<rect x="0" y="400" width="500" height="100" style="fill: green" />
+<rect x="0" y="0" width="10" height="400" style="fill: gray" />
+<rect x="490" y="0" width="10" height="400" style="fill: gray" />
+<circle id="ball" cx="10" cy="400" r="10" style="fill: blue" />
+</svg>
+
+<script>
+    
+  var x=20;
+  var y =10;
+  var vx = 0.1;
+  var vy = 0.2;
+  
+  var ball = d3.select("#ball");
+
+
+  function f_ball(t, z) {
+
+      var x=z[0];
+      var vx=z[1];
+      var y=z[2];
+      var vy=z[3];
+      
+      var ax=0;
+      var ay=-0.0001;
+      
+      if(y < 0) {
+      	  ay -= 0.1*y;
+      }
+      if(x > 490) {
+	  ax -= 0.1*(x-490);
+      }
+      else if(x < 10) {
+	  ax -= 0.1*(x-10);
+      }
+      return [vx, ax, vy, ay];
+  }
+
+  var t=0
+
+  function update_position(tnew) {
+
+      sol = numeric.dopri(t, tnew, [x,vx,y,vy], f_ball);
+      u = sol.at(tnew)
+  
+      x = u[0];
+      vx= u[1];
+      y = u[2];
+      vy= u[3];
+
+      ball.attr("cx", x).attr("cy",400-y);
+      t = tnew;
+  }
+
+  d3.timer(update_position) 
+  
+</script>
+
+</body>
+
+</html>
