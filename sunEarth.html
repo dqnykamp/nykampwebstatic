@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>This is a page</title>
+<title>Gravity Simulation</title>
 
 <script src="/js/d3.min.js" charset="utf-8"></script>
 <script src="/js/numeric-1.2.6.min.js" charset="utf-8"></script>
@@ -16,8 +16,11 @@
 <script>
 
 
- data = [{x: 300, vx: -0.2*1/10, y: 300, vy: 0, r: 10*Math.sqrt(10), m: 10, color: 'yellow'},];
-  data.push({x: 300, vx: 0.2, y: 500, vy: 0.0, r: 10, m: 1,  color: 'steelblue'});
+ data = [{x: 300, vx: (0.1*1+0.4*0.5)/-10, y: 300, vy: 0, r: 10*Math.sqrt(10), m: 10, color: 'yellow'},];
+  data.push({x: 300, vx: 0.1, y: 500, vy: 0.0, r: 10, m: 1,  color: 'steelblue'});
+
+  data.push({x: 300, vx: 0.4, y: 520, vy: 0.0, r: 5, m: 0.5,  color: 'lightGray'});
+
 
   var planets = d3.select("svg").selectAll("circle").data(data)
     .enter().append("circle")
