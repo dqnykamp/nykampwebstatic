@@ -20,27 +20,56 @@
 
 <script>
 
+  "use strict"
+
   var g=0.001;
+
+  var stop_animation=false;
+  var t_computed=0;
+
+  var drag = d3.behavior.drag()
+    .origin(function(d) { return {x: d.x, y: 400-d.y}; })
+    .on("drag", dragmove)
+    .on("dragstart", function() { stop_animation=true})
+    .on("dragend", dragend);
     
-  data = [{x: 400, vx: 0.1, y: 20, vy: 0.2, r: 10, m: 1*1, color: 'blue'},];
-  data.push({x: 50, vx: 0.15, y: 100, vy: 0.0, r: 5, m: 0.5*0.5,  color: 'red'});
-  data.push({x: 150, vx: -0.05, y: 100, vy: 0, r: 30, m: 3*3, 
+  var data = [{x: 200, vx: 0, y: 20, vy: 0.0, r: 10, m: 1*1, color: 'blue'},];
+  data.push({x: 200.1, vx: 0, y: 5, vy: 0.0, r: 5, m: 0.5*0.5,  color: 'red'});
+  data.push({x: 200, vx: 0, y: 60, vy: 0.0, r: 30, m: 3*3, 
 	     color: 'steelblue'});
+  data.push({x: 200, vx: 0, y: 130, vy: 0.0, r: 40, m: 4*4,  color: 'orange'});
 
   var balls = d3.select("svg").selectAll("circle").data(data)
     .enter().append("circle")
     .attr("cx", function(d) { return d.x})
     .attr("cy", function(d) { return 400-d.y})
     .attr("r", function(d) { return d.r} )
-    .style("fill", function(d) { return d.color} );
+    .style("fill", function(d) { return d.color} )
+    .attr("Fext", (0,0))
+    .call(drag);
+  
+  
+  function dragmove(d) {
+      d.x = d3.event.x;
+      d.y = 400-d3.event.y;
+      d3.select(this)
+	  .attr("cx", d3.event.x)
+	  .attr("cy", d3.event.y);
 
+  }
 
+  function dragend(d) {
 
+      stop_animation=false;
+      t_computed=0;
+      d3.timer(update_position);
+  }
 
   function f_ball(t, z) {
 
       var x,vx,y,vy, ax, ay, r;
-      dz=[]
+      var dz=[];
+
       for(var i=0; i<z.length/4; i++) {
 	  x=z[4*i];
 	  vx=z[4*i+1];
@@ -96,7 +125,6 @@
   var t=0;
   var sol;
   var t_chunk = 10;
-  var t_computed=0;
 
   var i_momentum=0;
   var n_momentum=100;
@@ -107,8 +135,12 @@
 
   function update_position(tnew) {
 
+      if(stop_animation) {
+	  return true;
+      }
+      
       while(tnew > t_computed) {
-	  z = []
+	  var z = [];
 
 	  for(var i=0; i<data.length; i++) {
 	      Array.prototype.push.apply(z, [data[i].x, data[i].vx, data[i].y, data[i].vy]);
@@ -118,7 +150,7 @@
 	  t_computed += t_chunk;
       }
 
-      u = sol.at(tnew);
+      var u = sol.at(tnew);
       //console.log(u);
 
       for(var i=0; i<data.length; i++) {
@@ -147,8 +179,8 @@
 		      Math.round((k_energy+p_energy)*1000)/1000);
 
 
-	  momemtum_x=0;
-	  momemtum_y=0;
+	  momentum_x=0;
+	  momentum_y=0;
 	  k_energy=0;
 	  p_energy=0;
 	  i_momentum=0;
