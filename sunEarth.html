@@ -15,11 +15,12 @@
 </svg>
 
 <script>
+"use strict"
 var drag=d3.behavior.drag()
 	.origin(function(d){return {x: d.x, y: 600-d.y}})
 	.on("drag",dragmove);
 
- data = [{x: 300, vx: (0.1*1+0.4*0.5)/-10, y: 300, vy: 0, r: 10*Math.sqrt(10), m: 10, color: 'yellow'},];
+ var data = [{x: 300, vx: (0.1*1+0.4*0.5)/-10, y: 300, vy: 0, r: 10*Math.sqrt(10), m: 10, color: 'yellow'},];
   data.push({x: 300, vx: 0.1, y: 500, vy: 0.0, r: 10, m: 1,  color: 'steelblue'});
 
   data.push({x: 300, vx: 0.4, y: 520, vy: 0.0, r: 5, m: 0.5,  color: 'lightGray'});
@@ -51,7 +52,7 @@ var t0 = Date.now();
 var G = 1;
 
 function f_gravity (t,z){
-	var x0,x1,y0,y1,vx0,vx1,vy0,vy1,m0,m1;
+	var x0,x1,y0,y1,vx0,vx1,vy0,vy1,m0,m1,r0,r1;
 	var dz = [];
 	var n = z.length/4;
 	for (var i=0; i<n; i++){
@@ -65,19 +66,22 @@ function f_gravity (t,z){
 		x0=z[i0*4];
 		y0=z[i0*4+2];
 		m0=data[i0].m;
+		r0=data[i0].r;
 		for(var i1=i0+1; i1<n; i1++){
 			x1=z[i1*4];
 			y1=z[i1*4+2];
 			m1=data[i1].m;
+			r1=data[i1].r;
 			var dx = x0-x1;
 			var dy = y0-y1;
 			var dist = dx*dx+dy*dy;
-			var f = (G*m1*m0)/dist;
+			var f_g = (G*m1*m0)/dist;//gravity force
 			dist=Math.sqrt(dist);
-			var fsub = f*dx/dist;
+			var f_c = 1/Math.pow(dist/(r0+r1)*1.2,20);//collision force
+			var fsub = (f_g-f_c)*dx/dist;
 			dz[4*i0+1]-=fsub/m0;
 			dz[4*i1+1]+=fsub/m1;
-			fsub = f*dy/dist;
+			fsub = (f_g-f_c)*dy/dist;
 			dz[4*i0+3]-=fsub/m0;
 			dz[4*i1+3]+=fsub/m1;
 		}	
@@ -95,7 +99,7 @@ var t=0;
   function update_position(tnew) {
 
       while(tnew > t_computed) {
-	  z = []
+	  var z = [];
 
 	  for(var i=0; i<data.length; i++) {
 	      Array.prototype.push.apply(z, [data[i].x, data[i].vx, data[i].y, data[i].vy]);
@@ -105,7 +109,7 @@ var t=0;
 	  t_computed += t_chunk;
       }
 
-      u = sol.at(tnew);
+      var u = sol.at(tnew);
       //console.log(u);
 
       for(var i=0; i<data.length; i++) {
